@@ -140,7 +140,7 @@ public class InstanceController {
         NamingUtils.checkServiceNameFormat(serviceName);
         
         final Instance instance = parseInstance(request);
-        
+        //注册实例
         serviceManager.registerInstance(namespaceId, serviceName, instance);
         return "ok";
     }

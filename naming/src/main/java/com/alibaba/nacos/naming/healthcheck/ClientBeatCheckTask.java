@@ -40,7 +40,7 @@ import java.util.List;
 
 /**
  * Check and update statues of ephemeral instances, remove them if they have been expired.
- *
+ * 客户端⼼跳检查线程
  * @author nkorange
  */
 public class ClientBeatCheckTask implements Runnable {
@@ -83,13 +83,15 @@ public class ClientBeatCheckTask implements Runnable {
             if (!getSwitchDomain().isHealthCheckEnabled()) {
                 return;
             }
-            
+            //1. 获取实例
             List<Instance> instances = service.allIPs(true);
             
             // first set health status of instances:
             for (Instance instance : instances) {
+                //2.检查客户端实例最后使⽤时间是否超时 默认15s
                 if (System.currentTimeMillis() - instance.getLastBeat() > instance.getInstanceHeartBeatTimeOut()) {
                     if (!instance.isMarked()) {
+                        //3.如果超时15秒设置健康状态为false
                         if (instance.isHealthy()) {
                             instance.setHealthy(false);
                             Loggers.EVT_LOG
@@ -114,7 +116,7 @@ public class ClientBeatCheckTask implements Runnable {
                 if (instance.isMarked()) {
                     continue;
                 }
-                
+                // 4. 检查是否超过30秒
                 if (System.currentTimeMillis() - instance.getLastBeat() > instance.getIpDeleteTimeout()) {
                     // delete instance
                     Loggers.SRV_LOG.info("[AUTO-DELETE-IP] service: {}, ip: {}", service.getName(),
